@@ -29,7 +29,8 @@ function App() {
   }
   const onAddButtonClick = () => {
     const id = Date.now()
-    const updatedList = [...list, { id, value }]
+    const date = new Date().toLocaleString('ru-RU', options)
+    const updatedList = [...list, { id, value, date }]
     setValue('')
     setError('')
     setList(updatedList)
@@ -57,7 +58,7 @@ function App() {
             return (<li className="list-item" key={el.id}>
               {el.value}
               {' '}
-              <span>{new Date().toLocaleString('ru-RU', options)}</span>
+              <span>{el.date}</span>
             </li>)
           })}
         </ul>
