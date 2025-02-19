@@ -1,69 +1,81 @@
 import { useState } from 'react'
-import './App.css'
-
+import styles from './app.module.css'
+import data from './data.json'
+import ButtonContainer from './ButtonContainer'
 function App() {
-  const [value, setValue] = useState('')
-  const [list, setList] = useState([])
-  const [error, setError] = useState('')
-  const [isValueVaild, setIsValueVaild] = useState(false)
-  const options = {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric'
-  }
-  const onInputButtonClick = () => {
-    const promptValue = prompt()
-    if (promptValue.length > 3) {
-      setValue(promptValue)
-      setError('')
-      setIsValueVaild(true)
+  const [steps, setSteps] = useState(data)
+  const [activeIndex, setActiveIndex] = useState(0)
 
-    } else {
-      setError(promptValue)
-      setValue('')
-      setIsValueVaild(false)
-    }
+  const canceClick = () => {
+    if (activeIndex !== 0) setActiveIndex(activeIndex - 1)
   }
-  const onAddButtonClick = () => {
-    const id = Date.now()
-    const date = new Date().toLocaleString('ru-RU', options)
-    const updatedList = [...list, { id, value, date }]
-    setValue('')
-    setError('')
-    setList(updatedList)
+  const nextClick = () => {
+    setSteps([...steps,])
+    if (activeIndex !== data.length - 1) setActiveIndex(activeIndex + 1)
+  }
+  const restartClick = () => {
+    setActiveIndex(0)
+  }
+  const btnClick = (event) => {
+    if (event.target.tagName === "BUTTON") {
+      setActiveIndex(+event.target.textContent - 1)
+    }
   }
 
   return (
-    <div className="app">
-      <h1 className="page-heading">Ввод значения</h1>
-      <p className="no-margin-text">
-        Текущее значение <code>value</code>: "<output className="current-value">{value}</output>"
-      </p>
-      {error !== '' && <div className="error">Введенное значение {error} должно содержать минимум 3 символа</div>}
-      <div className="buttons-container">
-        <button className="button" onClick={() => { onInputButtonClick() }}>Ввести новое</button>
-        <button className="button"
-          disabled={!isValueVaild}
-          onClick={() => onAddButtonClick()}
-        >Добавить в список</button>
+    <div className={styles.container} >
+      <div className={styles.card}>
+        <h1>Инструкция по готовке пельменей</h1>
+        <div className={styles.steps}>
+          <div className={styles['steps-content']} >
+            {steps[activeIndex].content}
+          </div>
+          <ul className={styles['steps-list']}
+            onClick={event => btnClick(event)}
+          >
+            {steps.map((step, index) => {
+              return (
+                <li className={
+                  activeIndex === index
+                    ? `${styles['steps-item']} ${styles.active}`
+                    : activeIndex > index
+                      ? `${styles['steps-item']} ${styles.done}`
+                      : styles['steps-item']
+
+                } key={index} >
+                  <button
+                    className={styles['steps-item-button']
+                    }>
+                    {index + 1}
+                  </button>
+                  {step.title}
+                </li>
+              )
+            })}
+
+          </ul>
+          <div className={styles['buttons-container']}>
+            <ButtonContainer
+              disabled={activeIndex === 0}
+              onClick={canceClick}
+            >
+              Назад
+            </ButtonContainer>
+            {activeIndex === data.length - 1 ?
+              <ButtonContainer
+                onClick={restartClick}
+              >
+                Начачь сначало
+              </ButtonContainer> :
+              <ButtonContainer
+                onClick={nextClick}
+              >
+                Далее
+              </ButtonContainer>}
+          </div>
+        </div>
       </div>
-      <div className="list-container">
-        <h2 className="list-heading">Список:</h2>
-        {list.length === 0 && <p className="no-margin-text">Нет добавленных элементов</p>}
-        <ul className="list">
-          {list.map((el) => {
-            return (<li className="list-item" key={el.id}>
-              {el.value}
-              {' '}
-              <span>{el.date}</span>
-            </li>)
-          })}
-        </ul>
-      </div>
-    </div>
+    </div >
   )
 }
 
